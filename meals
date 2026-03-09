@@ -1,0 +1,344 @@
+import { useState } from "react";
+
+const meals = {
+  breakfast: [
+    "שקשוקה טחינה ירקות חתוכים ושלוש פרסות לחם כוסמין מלא",
+    "חביתת ירק טחינה סלט ירקות",
+    "ביצה עין סלט ירקות סלט ושלוש פרסות לחם כוסמין מלא",
+    "ביצה עין סלט ירקות טחינה ושלוש פרסות לחם כוסמין מלא",
+    "חביתה סלט ירקות וטחינה",
+    "חביתה סלט ירקות וטונה",
+    "ביצה עין סלט ירקות וטונה",
+    "ביצה עין סלט ירקות וטחינה",
+  ],
+  lunch: [
+    "חומוס עם פיתה מקמח מלא",
+    "נקניקיות גרמניות וסלט ירקות",
+    "חומוס טרי עם לחם וירקות",
+    "פסטה בולונז",
+    "ציפטי עם פרגית",
+    "טורטיה עם מוקפץ",
+    "סנדביץ חזה עוף",
+    "סנדביץ׳ טונה",
+    "סנדביץ׳ שווארמה",
+    "סנדביץ קציצות בשר",
+    "סנדביץ׳ פסטרמה",
+    "מזליקה סנדביציים",
+    "סנדביץ׳ עם סלט ביציים/חביתה וירקות",
+    "כנפיים מתוקות וסלט ירקות",
+  ],
+  dinner: [
+    "חומוס טרי וירקות",
+    "תבשיל הודי עם ציפטי",
+    "מרק עגבניות קציצות בצל הודיות עם ירקות בצד",
+    "מרק הודי טעים וקציצות בצל הודיות",
+    "אנטיפסטי",
+    "שניצל ופסטה/פתיתים",
+    "קציצות בקר ברוטב עגבניות",
+    "קציצות עוף עם רוטב עגבניות ואורז צהוב",
+    "מקלובה מושלמת | חן במטבח",
+    "סטייק אנטריקוט עם פתוחי אדמה וירקות",
+    "כנפיים מתוקות (1)",
+    "ציפטי עם קבב",
+    "ערוק - קציצות ירק עם חזה עוף",
+    "כנפיים בתנור עם סלט ואורז מתובל",
+    "מרק שעועית עם בשר",
+    "טאלי הודי",
+    "שוקי עוף צלויות מתקתקות | חן במטבח | מתכון",
+    "בשר מוקפץ עם ירקות",
+    "סיגלובה של סיגל",
+    "תבשיל עוף עם בצל ותפוחי-אדמה | חן במטבח | מתכון",
+    "מוקפץ בקר פלפלים סלרי ובצל ירוק | חן במטבח | מתכון",
+    "בולונז",
+    "שניצל וירקות",
+    "המבורגר עם ירקות בצד ותפוחי אדמה אפויים",
+    "נקניקיות מעולות עם ירקות חתוכים",
+    "סטייק אנטריקוט עם ירקות בצד",
+    "כבד עוף עם בצל מקורמל ואורז מתובל",
+    "קבב + ירקות טחינה ונאן",
+  ],
+};
+
+const mealEmojis = { breakfast: "☀️", lunch: "🌤️", dinner: "🌙" };
+const mealLabels = { breakfast: "ארוחת בוקר", lunch: "ארוחת צהריים", dinner: "ארוחת ערב" };
+const steps = ["breakfast", "lunch", "dinner", "summary"];
+
+export default function MealPlanner() {
+  const [step, setStep] = useState(0);
+  const [selected, setSelected] = useState({ breakfast: "", lunch: "", dinner: "" });
+  const [hovered, setHovered] = useState(null);
+
+  const currentMeal = steps[step];
+  const isStepMeal = step < 3;
+
+  const handleSelect = (meal) => {
+    const mealKey = steps[step];
+    setSelected((prev) => ({ ...prev, [mealKey]: meal }));
+    setTimeout(() => setStep((s) => s + 1), 300);
+  };
+
+  const shareWhatsApp = () => {
+    const text = `🍽️ תפריט היום שלי:\n\n☀️ בוקר: ${selected.breakfast}\n🌤️ צהריים: ${selected.lunch}\n🌙 ערב: ${selected.dinner}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const reset = () => {
+    setStep(0);
+    setSelected({ breakfast: "", lunch: "", dinner: "" });
+    setHovered(null);
+  };
+
+  return (
+    <div style={styles.root} dir="rtl">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;700;900&family=Heebo:wght@300;400;500&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c8a96e; border-radius: 2px; }
+        .meal-item { transition: all 0.2s ease; }
+        .meal-item:hover { transform: translateX(-4px); }
+        .progress-dot { transition: all 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .animate-in { animation: fadeIn 0.5s ease forwards; }
+        .share-btn:hover { transform: scale(1.03); box-shadow: 0 8px 32px rgba(200,169,110,0.4) !important; }
+        .reset-btn:hover { background: rgba(255,255,255,0.08) !important; }
+      `}</style>
+
+      {/* Header */}
+      <div style={styles.header}>
+        <div style={styles.logo}>🍽️</div>
+        <h1 style={styles.title}>תפריט היום</h1>
+        <p style={styles.subtitle}>בניית ארוחות יומיות בשלושה שלבים</p>
+
+        {/* Progress */}
+        <div style={styles.progressRow}>
+          {["breakfast", "lunch", "dinner"].map((m, i) => (
+            <div key={m} style={styles.progressItem}>
+              <div
+                className="progress-dot"
+                style={{
+                  ...styles.dot,
+                  background: i < step ? "#c8a96e" : i === step ? "rgba(200,169,110,0.5)" : "rgba(255,255,255,0.1)",
+                  border: i === step ? "2px solid #c8a96e" : "2px solid transparent",
+                  boxShadow: i === step ? "0 0 16px rgba(200,169,110,0.5)" : "none",
+                }}
+              >
+                {i < step ? "✓" : mealEmojis[m]}
+              </div>
+              <span style={{ ...styles.dotLabel, color: i <= step ? "#c8a96e" : "#556" }}>
+                {mealLabels[m]}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={styles.content}>
+        {isStepMeal && (
+          <div className="animate-in" key={step}>
+            <div style={styles.mealHeader}>
+              <span style={styles.mealEmoji}>{mealEmojis[currentMeal]}</span>
+              <h2 style={styles.mealTitle}>בחר {mealLabels[currentMeal]}</h2>
+            </div>
+            <div style={styles.list}>
+              {meals[currentMeal].map((meal, i) => (
+                <button
+                  key={i}
+                  className="meal-item"
+                  style={{
+                    ...styles.mealBtn,
+                    background: hovered === `${step}-${i}` ? "rgba(200,169,110,0.1)" : "rgba(255,255,255,0.03)",
+                    borderColor: hovered === `${step}-${i}` ? "rgba(200,169,110,0.5)" : "rgba(255,255,255,0.07)",
+                    animationDelay: `${i * 0.04}s`,
+                  }}
+                  onMouseEnter={() => setHovered(`${step}-${i}`)}
+                  onMouseLeave={() => setHovered(null)}
+                  onClick={() => handleSelect(meal)}
+                >
+                  <span style={styles.mealBtnText}>{meal}</span>
+                  <span style={styles.arrow}>←</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="animate-in" style={styles.summary}>
+            <div style={styles.summaryHeader}>
+              <span style={{ fontSize: 40 }}>🎉</span>
+              <h2 style={styles.summaryTitle}>התפריט שלך היום</h2>
+            </div>
+            {["breakfast", "lunch", "dinner"].map((m) => (
+              <div key={m} style={styles.summaryCard}>
+                <div style={styles.summaryMealLabel}>
+                  <span style={styles.summaryEmoji}>{mealEmojis[m]}</span>
+                  <span style={styles.summaryMealName}>{mealLabels[m]}</span>
+                </div>
+                <p style={styles.summaryMealText}>{selected[m]}</p>
+              </div>
+            ))}
+            <button
+              className="share-btn"
+              style={styles.shareBtn}
+              onClick={shareWhatsApp}
+            >
+              <span>📲</span>
+              <span>שתף בוואטסאפ</span>
+            </button>
+            <button
+              className="reset-btn"
+              style={styles.resetBtn}
+              onClick={reset}
+            >
+              בנה תפריט חדש
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  root: {
+    minHeight: "100vh",
+    background: "linear-gradient(160deg, #0f1117 0%, #161820 50%, #0c0e14 100%)",
+    fontFamily: "'Heebo', sans-serif",
+    color: "#e8e0d0",
+    display: "flex",
+    flexDirection: "column",
+  },
+  header: {
+    padding: "40px 24px 28px",
+    textAlign: "center",
+    borderBottom: "1px solid rgba(200,169,110,0.12)",
+    background: "rgba(200,169,110,0.03)",
+  },
+  logo: { fontSize: 36, marginBottom: 8 },
+  title: {
+    fontFamily: "'Frank Ruhl Libre', serif",
+    fontSize: 32,
+    fontWeight: 900,
+    color: "#e8e0d0",
+    letterSpacing: 1,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#778",
+    marginTop: 4,
+    marginBottom: 24,
+    fontWeight: 300,
+  },
+  progressRow: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 32,
+    flexWrap: "wrap",
+  },
+  progressItem: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 6,
+  },
+  dot: {
+    width: 44,
+    height: 44,
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 18,
+    color: "#e8e0d0",
+    fontWeight: 700,
+  },
+  dotLabel: { fontSize: 11, fontWeight: 500, letterSpacing: 0.5 },
+  content: { flex: 1, padding: "28px 20px 40px", maxWidth: 640, width: "100%", margin: "0 auto" },
+  mealHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 20,
+    padding: "0 4px",
+  },
+  mealEmoji: { fontSize: 28 },
+  mealTitle: {
+    fontFamily: "'Frank Ruhl Libre', serif",
+    fontSize: 22,
+    fontWeight: 700,
+    color: "#c8a96e",
+  },
+  list: { display: "flex", flexDirection: "column", gap: 8 },
+  mealBtn: {
+    width: "100%",
+    padding: "14px 16px",
+    border: "1px solid",
+    borderRadius: 10,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    color: "#e8e0d0",
+    textAlign: "right",
+    animation: "fadeIn 0.4s ease forwards",
+    opacity: 0,
+  },
+  mealBtnText: { fontSize: 14, fontWeight: 400, lineHeight: 1.5 },
+  arrow: { color: "#c8a96e", fontSize: 16, flexShrink: 0, marginRight: 8 },
+  summary: { display: "flex", flexDirection: "column", gap: 14 },
+  summaryHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 6,
+    justifyContent: "center",
+  },
+  summaryTitle: {
+    fontFamily: "'Frank Ruhl Libre', serif",
+    fontSize: 24,
+    fontWeight: 700,
+    color: "#c8a96e",
+  },
+  summaryCard: {
+    background: "rgba(200,169,110,0.06)",
+    border: "1px solid rgba(200,169,110,0.15)",
+    borderRadius: 12,
+    padding: "16px 18px",
+  },
+  summaryMealLabel: { display: "flex", alignItems: "center", gap: 8, marginBottom: 6 },
+  summaryEmoji: { fontSize: 18 },
+  summaryMealName: { fontSize: 12, color: "#c8a96e", fontWeight: 500, letterSpacing: 0.5 },
+  summaryMealText: { fontSize: 15, color: "#e8e0d0", lineHeight: 1.6 },
+  shareBtn: {
+    marginTop: 8,
+    width: "100%",
+    padding: "16px",
+    background: "#25D366",
+    border: "none",
+    borderRadius: 12,
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 700,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    transition: "all 0.25s ease",
+  },
+  resetBtn: {
+    width: "100%",
+    padding: "14px",
+    background: "transparent",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: 12,
+    color: "#778",
+    fontSize: 14,
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+};
